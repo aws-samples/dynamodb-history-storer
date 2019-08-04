@@ -1,0 +1,37 @@
+{
+  "name": "dynamodb-history-storer",
+  "description": "Store DynamoDB stream records to S3 and enable search from Athena",
+  "version": "0.1.0",
+  "license": "(Apache-2.0 AND MIT-0)",
+  "repository": "https://github.com/aws-samples/dynamodb-history-storer",
+  "homepage": "https://github.com/aws-samples/dynamodb-history-storer",
+  "dependencies": {},
+  "devDependencies": {
+    "aws-sdk-mock": "^4.3.1",
+    "chai": "^4.2",
+    "mocha": "^5.2",
+    "nyc": "^14.1.1",
+    "proxyquire": "^2.1.0",
+    "sinon": "^7.2",
+    "sinon-chai": "^3.3"
+  },
+  "engines": {
+    "node": "8.10"
+  },
+  "files": [
+    "src/"
+  ],
+  "config": {
+    "bucket": "dynamodb-history-storer-devo"
+  },
+  "scripts": {
+    "clean": "rm -rf ./.build ./.nyc_output",
+    "test": "nyc mocha ./tst/",
+    "build": "mkdir -p .build/pkg && cp -r package.json src/ .build/pkg && (cd .build/pkg && npm install --only=prod)",
+    "setup": "aws configure",
+    "package": "npm run build && sam package --template-file template.yml --output-template-file .build/sam.packaged.yml --s3-bucket $npm_package_config_bucket",
+    "deploy": "npm run package && sam deploy --template-file .build/sam.packaged.yml --stack-name $npm_package_name --capabilities CAPABILITY_IAM",
+    "delete-stack": "aws cloudformation delete-stack --stack-name $npm_package_name",
+    "publish": "sam publish --template .build/sam.packaged.yml"
+  }
+}

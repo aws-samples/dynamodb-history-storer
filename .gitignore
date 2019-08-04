@@ -1,0 +1,5 @@
+.build
+.github
+.nyc_output
+*.iml
+node_modules
