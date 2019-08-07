@@ -42,17 +42,6 @@ Parameters:
     Type: CommaDelimitedList
     Default: ''
 Resources:
-  DescribeDynamoDbTablePolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-        - Effect: Allow
-          Action:
-          - dynamodb:DescribeTable
-          Resource: '*'
-
   DynamoDbHistoryStorer:
     Type: AWS::Serverless::Function
     Properties:
@@ -61,7 +50,8 @@ Resources:
       Handler: index.handler
       Runtime: nodejs8.10
       Policies:
-      - {Ref: DescribeDynamoDbTablePolicy}
+      - DynamoDBReadPolicy:
+          TableName: '*'
       - DynamoDBStreamReadPolicy:
           TableName: '*'
           StreamName: '*'
