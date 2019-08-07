@@ -19,7 +19,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['DynamoDB','Glue','Athena']
     HomePageUrl: https://github.com/aws-samples/dynamodb-history-storer
-    SemanticVersion: 0.1.1
+    SemanticVersion: 0.2.0
     SourceCodeUrl: https://github.com/aws-samples/dynamodb-history-storer
 
 Parameters:
@@ -201,13 +201,21 @@ Resources:
 
   S3Bucket:
     Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
     Properties:
       AccessControl: Private
       LifecycleConfiguration:
         Rules:
         - ExpirationInDays: {Ref: HistoryRetentionInDays}
           Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
 
   ExampleQuery:
     Type: AWS::Athena::NamedQuery
