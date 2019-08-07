@@ -38,7 +38,7 @@ npm run setup
 # you will be asked for credentials
 ```
 
-Configure bucket for uploading SAM package
+Configure bucket for uploading SAM package. The bucket needs to be configured as described [here](https://docs.aws.amazon.com/serverlessrepo/latest/devguide/serverlessrepo-how-to-publish.html#publishing-application-through-aws-console).
 ```console
 npm config set dynamodb-history-storer:bucket YOUR_BUCKET_NAME
 ```
