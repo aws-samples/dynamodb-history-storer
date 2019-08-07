@@ -28,7 +28,7 @@ Parameters:
       This parameter is used as suffix for some resource names.
       Multiple stack can be installed to one account by putting different stage names.
     Type: String
-    Default: dev
+    Default: prod
   LambdaLogRetentionInDays:
     Type: Number
     Default: 14
