@@ -19,7 +19,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['DynamoDB','Glue','Athena']
     HomePageUrl: https://github.com/aws-samples/dynamodb-history-storer
-    SemanticVersion: 0.2.0
+    SemanticVersion: 0.3.0
     SourceCodeUrl: https://github.com/aws-samples/dynamodb-history-storer
 
 Parameters:
@@ -118,6 +118,31 @@ Resources:
             - Fn::Sub: arn:${AWS::Partition}:s3:::${S3Bucket}
             - Fn::Sub: arn:${AWS::Partition}:s3:::${S3Bucket}/*
 
+  GlueTableAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - 'firehose.amazonaws.com'
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: GlueReadOnlyPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - glue:GetTables
+            - glue:GetTable
+            - glue:GetTableVersions
+            Resource:
+            - Fn::Sub: arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:*
+
   FirehoseStream:
     Type: AWS::KinesisFirehose::DeliveryStream
     DependsOn: [S3Bucket, GlueDatabase, GlueTable]
@@ -133,12 +158,29 @@ Resources:
         Prefix: 'data/'
         BufferingHints:
           IntervalInSeconds: 60
-          SizeInMBs: 1
+          SizeInMBs: 64
         CloudWatchLoggingOptions:
           Enabled: false
-        CompressionFormat: GZIP
-        #  We would like to use Parquet format as it's more efficient in terms of storage space and search speed,
-        #  but CloudFormation does not support DataFormatConversionConfiguration so far.
+        CompressionFormat: UNCOMPRESSED
+        DataFormatConversionConfiguration:
+          Enabled: true
+          InputFormatConfiguration:
+            Deserializer:
+              OpenXJsonSerDe:
+                ColumnToJsonKeyMappings:
+                  CaseInsensitive: True
+          OutputFormatConfiguration:
+            Serializer:
+              ParquetSerDe:
+                Compression: SNAPPY
+          SchemaConfiguration:
+            CatalogId: {Ref: 'AWS::AccountId'}
+            DatabaseName: {Ref: GlueDatabase}
+            Region: {Ref: 'AWS::Region'}
+            RoleARN:
+              Fn::GetAtt: [GlueTableAccessRole, Arn]
+            TableName: {Ref: GlueTable}
+            VersionId: LATEST
 
   GlueDatabase:
     Type: AWS::Glue::Database
@@ -181,11 +223,13 @@ Resources:
             Type: bigint
           - Name: SequenceNumber
             Type: string
-          InputFormat: org.apache.hadoop.mapred.TextInputFormat
-          OutputFormat: org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat
+          InputFormat: org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat
+          OutputFormat: org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat
           Compressed: true
           SerdeInfo:
-            SerializationLibrary: org.openx.data.jsonserde.JsonSerDe
+            SerializationLibrary: org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe
+            Parameters:
+              serialization.format: 1
         Parameters:
           projection.enabled: true
           projection.datehour.type: date
