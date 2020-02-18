@@ -3,7 +3,7 @@ const aws = require('aws-sdk');
 const assert = require('assert');
 
 const getTableNameFromArn = (sourceARN) => {
-    const found = sourceARN.match(/arn:aws:dynamodb:[^:]+:[0-9]+:table\/(\w+)\/.*/);
+    const found = sourceARN.match(/arn:aws:dynamodb:[^:]+:[0-9]+:table\/([\w-]+)\/.*/);
     assert(found[1] !== undefined, 'Failed to parse ARN to extract table name:' + sourceARN);
     return found[1];
 };

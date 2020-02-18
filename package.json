@@ -1,7 +1,7 @@
 {
   "name": "dynamodb-history-storer",
   "description": "Store DynamoDB stream records to S3 and enable search from Athena",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "license": "(Apache-2.0 AND MIT-0)",
   "repository": "https://github.com/aws-samples/dynamodb-history-storer",
   "homepage": "https://github.com/aws-samples/dynamodb-history-storer",
