@@ -19,7 +19,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['DynamoDB','Glue','Athena']
     HomePageUrl: https://github.com/aws-samples/dynamodb-history-storer
-    SemanticVersion: 0.4.1
+    SemanticVersion: 0.5.0
     SourceCodeUrl: https://github.com/aws-samples/dynamodb-history-storer
 
 Parameters:
@@ -48,7 +48,7 @@ Resources:
       FunctionName:
         Fn::Sub: 'DynamoDBHistoryStorer-${Stage}'
       Handler: index.handler
-      Runtime: nodejs10.x
+      Runtime: nodejs14.x
       Policies:
       - DynamoDBReadPolicy:
           TableName: '*'
